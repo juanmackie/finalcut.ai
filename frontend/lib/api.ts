@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Env values are often pasted with stray CR/LF, which leaks into the request URL
+// (Next.js does not strip them). Normalize once, here.
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '/api').trim().replace(/\/+$/, '') || '/api';
 
 function normalizeList<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data as T[];

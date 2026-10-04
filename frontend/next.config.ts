@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+// Vercel/env values frequently carry stray CR/LF (e.g. NEXT_PUBLIC_API_URL="https://.../api\r").
+// NEXT_PUBLIC_* values are inlined verbatim into the bundle and BACKEND_URL goes into the
+// rewrite rules, so normalize them here before the config is read.
+for (const key of ["NODE_ENV", "NEXT_PUBLIC_API_URL", "BACKEND_URL"]) {
+  if (process.env[key]) process.env[key] = process.env[key]!.trim();
+}
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [

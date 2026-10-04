@@ -7,18 +7,23 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
+import { resolveDatabaseConfig } from '../backend/src/db-config';
+
+// Env values are frequently pasted with stray CR/LF, which breaks URL parsing, CORS
+// matching and TLS option handling. Read every variable through this.
+const readEnv = (name: string) => process.env[name]?.trim();
 
 const app = express();
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',').map((s) => s.trim()).filter(Boolean) || true,
+  origin: readEnv('CORS_ORIGIN')?.split(',').map((s) => s.trim()).filter(Boolean) || true,
   credentials: false,
 }));
 app.use(helmet());
 app.use(morgan('tiny'));
 app.use(express.json({ limit: '32kb' }));
 
-const SECRET_KEY = process.env.JWT_SECRET || 'dev_secret_key';
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+const SECRET_KEY = readEnv('JWT_SECRET') || 'dev_secret_key';
+if (!readEnv('JWT_SECRET') && readEnv('NODE_ENV') === 'production') {
   throw new Error('JWT_SECRET must be set in production');
 }
 
@@ -26,13 +31,19 @@ let pool: Pool;
 
 const getPool = () => {
   if (pool) return pool;
+  const { connectionString, ssl } = resolveDatabaseConfig();
   console.log('[finalcut.ai DB] Initializing connection pool...');
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    connectionString,
+    ssl,
     max: 1, 
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
+  });
+  // Without this listener an idle-client error (e.g. the pooler dropping a
+  // connection) is an unhandled 'error' event and kills the lambda instance.
+  pool.on('error', (err: Error) => {
+    console.error('[finalcut.ai DB] Idle client error:', err.message);
   });
   return pool;
 };
@@ -90,7 +101,7 @@ app.get('/api/health', (req, res) => {
     status: 'active', 
     service: 'finalcut.ai_Core',
     message: 'The Synthetic Pulse is stable.', 
-    database: !!process.env.DATABASE_URL 
+    database: !!readEnv('DATABASE_URL') 
   });
 });
 
@@ -494,7 +505,7 @@ app.get('/api/search', async (req: any, res: any) => {
 // If SETUP_TOKEN is unset, this endpoint is disabled (410).
 app.get('/api/setup-db', async (req, res) => {
     try {
-      const required = process.env.SETUP_TOKEN;
+      const required = readEnv('SETUP_TOKEN');
       if (!required) return res.status(410).json({ error: 'Setup endpoint disabled' });
       const provided =
         (req.query.token as string | undefined) ||
