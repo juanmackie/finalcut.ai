@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL CHECK (length(content) <= 280),
+    parent_id INTEGER REFERENCES posts(id) ON DELETE SET NULL,
+    retweet_id INTEGER REFERENCES posts(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,5 +31,7 @@ CREATE TABLE IF NOT EXISTS likes (
     PRIMARY KEY (user_id, post_id)
 );
 
-CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
-CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_parent_id ON posts(parent_id);
+CREATE INDEX IF NOT EXISTS idx_posts_retweet_id ON posts(retweet_id);

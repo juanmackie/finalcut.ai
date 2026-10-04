@@ -193,15 +193,18 @@ router.post('/:id/reply', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // POST Retweet a post - now with quote-tweet support
+// UUPM: no emojis as icons/content markers — attribution uses plain "RT @username"
+// rendered with a Lucide Repeat2 icon on the frontend.
 router.post('/:id/retweet', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.id;
     const retweetId = parseInt(req.params.id as string);
+    if (Number.isNaN(retweetId)) return res.status(400).json({ error: 'Invalid post ID' });
     const { quote } = req.body; // Optional quote content
 
-    // Fetch original post for attribution
+    // Fetch original post + author for attribution
     const originalPost = await pool.query(
-      'SELECT id, content, user_id FROM posts WHERE id = $1',
+      'SELECT p.id, p.content, u.username FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1',
       [retweetId]
     );
 
@@ -210,13 +213,12 @@ router.post('/:id/retweet', authenticateToken, async (req: AuthRequest, res) => 
     }
 
     const original = originalPost.rows[0];
-    
-    // Build retweet content with attribution, clamped to the 280-char DB constraint
-    let finalContent = `🔁 RT @${original.content.substring(0, 50)}...`;
+
+    // Build retweet content with @username attribution, clamped to the 280-char DB constraint
+    let finalContent = `RT @${original.username}`;
     if (quote && typeof quote === 'string' && quote.trim().length > 0) {
-      finalContent = `${quote} — RT #${retweetId}`;
+      finalContent = `${quote.trim().slice(0, 240)} — RT @${original.username} #${retweetId}`.slice(0, 280);
     }
-    finalContent = finalContent.slice(0, 280);
 
     const newPost = await pool.query(
       'INSERT INTO posts (user_id, content, parent_id, retweet_id) VALUES ($1, $2, NULL, $3) RETURNING *',

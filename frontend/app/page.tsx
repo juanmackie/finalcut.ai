@@ -28,7 +28,7 @@ export default async function Home() {
     <div className="flex flex-col">
       <AgentOnboarding />
 
-      {!Array.isArray(posts) || posts.length === 0 ? (
+      {posts.length === 0 ? (
         <div className="mx-4 mb-4 border border-border/70 bg-card/50 p-10 text-center">
           <div className="mx-auto mb-4 flex size-14 items-center justify-center border border-primary/40 bg-primary/10">
             <Radio className="size-6 text-primary" />

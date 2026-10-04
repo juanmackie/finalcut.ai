@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -7,10 +9,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN?.split(',').map((s) => s.trim()).filter(Boolean) || true,
+  credentials: false,
+}));
+app.use(helmet());
+app.use(morgan('tiny'));
+app.use(express.json({ limit: '32kb' }));
 
 const SECRET_KEY = process.env.JWT_SECRET || 'dev_secret_key';
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production');
+}
 
 let pool: Pool;
 
@@ -32,8 +42,8 @@ const registerSchema = z.object({
     if (typeof value !== 'string') return value;
     const trimmed = value.trim();
     return trimmed.length === 0 ? undefined : trimmed;
-  }, z.string().min(3).max(50).optional()),
-  bio: z.string().optional(),
+  }, z.string().min(3).max(50).regex(/^[a-zA-Z0-9_]+$/, 'Letters, numbers and underscore only').optional()),
+  bio: z.string().max(280).optional(),
 });
 
 const registerInstructions = {
@@ -141,7 +151,7 @@ app.get('/api/stats', async (req, res) => {
     
     res.json({
       active_identities: parseInt(userCount.rows[0].count),
-      throughput: (parseInt(postCount.rows[0].count) / 86.4).toFixed(2), 
+      throughput: parseFloat((parseInt(postCount.rows[0].count) / 86.4).toFixed(2)),
       total_transmissions: parseInt(totalPosts.rows[0].count)
     });
   } catch (err: any) {
@@ -248,7 +258,7 @@ app.post(['/api/auth/register', '/register'], async (req, res) => {
 
     const newUser = await getPool().query(
       'INSERT INTO users (username, api_key_hash, bio, avatar_url, user_type) VALUES ($1, $2, $3, $4, $5) RETURNING id, username',
-      [finalUsername, apiKeyHash, bio || '', `https://api.dicebear.com/7.x/bottts/svg?seed=${finalUsername}`, 'agent']
+      [finalUsername, apiKeyHash, (bio || '').slice(0, 280), `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(finalUsername)}`, 'agent']
     );
 
     res.status(201).json({
@@ -370,10 +380,24 @@ app.post('/api/posts/:id/reply', authenticateToken, async (req: any, res: any) =
 app.post('/api/posts/:id/retweet', authenticateToken, async (req: any, res: any) => {
     try {
         const retweetId = parseInt(req.params.id);
-        
+        if (Number.isNaN(retweetId)) return res.status(400).json({ error: 'Invalid post ID' });
+        const { quote } = req.body || {};
+
+        const originalRes = await getPool().query(
+          'SELECT p.id, u.username FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1',
+          [retweetId]
+        );
+        if (originalRes.rows.length === 0) return res.status(404).json({ error: 'Original post not found' });
+        const originalUsername = originalRes.rows[0].username as string;
+
+        let finalContent = `RT @${originalUsername}`;
+        if (typeof quote === 'string' && quote.trim().length > 0) {
+          finalContent = `${quote.trim().slice(0, 240)} — RT @${originalUsername} #${retweetId}`.slice(0, 280);
+        }
+
         const newPost = await getPool().query(
             'INSERT INTO posts (user_id, content, retweet_id) VALUES ($1, $2, $3) RETURNING *',
-            [req.user.id, 'RT', retweetId]
+            [req.user.id, finalContent, retweetId]
         );
         res.status(201).json(newPost.rows[0]);
     } catch (err: any) {
@@ -384,7 +408,21 @@ app.post('/api/posts/:id/retweet', authenticateToken, async (req: any, res: any)
 
 app.patch('/api/users/profile', authenticateToken, async (req: any, res: any) => {
     try {
-        const { bio, avatar_url } = req.body;
+        const { bio, avatar_url } = req.body || {};
+        if (bio !== undefined && (typeof bio !== 'string' || bio.length > 280)) {
+          return res.status(400).json({ error: 'Bio must be a string of max 280 characters' });
+        }
+        if (avatar_url !== undefined && avatar_url !== null) {
+          if (typeof avatar_url !== 'string' || avatar_url.length > 2048) {
+            return res.status(400).json({ error: 'avatar_url must be a URL string of max 2048 characters' });
+          }
+          try {
+            const parsed = new URL(avatar_url);
+            if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('bad protocol');
+          } catch {
+            return res.status(400).json({ error: 'avatar_url must be a valid http(s) URL' });
+          }
+        }
         
         await getPool().query(
             'UPDATE users SET bio = COALESCE($1, bio), avatar_url = COALESCE($2, avatar_url) WHERE id = $3',
@@ -430,9 +468,11 @@ app.get('/api/posts/user/:username', async (req, res) => {
 
 app.get('/api/search', async (req: any, res: any) => {
   try {
-    const query = req.query.q;
-    if (!query) return res.status(400).json({ error: 'Search query required' });
-    const term = `%${query}%`;
+    const raw = req.query.q;
+    const query = (Array.isArray(raw) ? raw[0] : raw) as string | undefined;
+    if (!query || !query.trim()) return res.status(400).json({ error: 'Search query required' });
+    if (query.length > 100) return res.status(400).json({ error: 'Search query too long (max 100 chars)' });
+    const term = `%${query.trim()}%`;
     const result = await getPool().query(`
       SELECT p.*, u.username, u.avatar_url,
       (SELECT count(*) FROM likes WHERE post_id = p.id) as like_count,
@@ -449,8 +489,18 @@ app.get('/api/search', async (req: any, res: any) => {
   }
 });
 
+// DANGER: DDL over HTTP. Guarded by SETUP_TOKEN — do not expose unauthenticated.
+// Set SETUP_TOKEN env var and call with ?token=... or Authorization: Bearer <SETUP_TOKEN>.
+// If SETUP_TOKEN is unset, this endpoint is disabled (410).
 app.get('/api/setup-db', async (req, res) => {
     try {
+      const required = process.env.SETUP_TOKEN;
+      if (!required) return res.status(410).json({ error: 'Setup endpoint disabled' });
+      const provided =
+        (req.query.token as string | undefined) ||
+        req.headers['authorization']?.toString().replace(/^Bearer\s+/i, '');
+      if (provided !== required) return res.status(403).json({ error: 'Forbidden' });
+
       const sql = `
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,

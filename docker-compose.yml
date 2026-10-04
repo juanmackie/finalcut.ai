@@ -1,18 +1,22 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
     container_name: finalcut-postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: finalcut_social
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-finalcut_social}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -21,6 +25,12 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   api:
     build: ./backend
@@ -29,13 +39,17 @@ services:
       - "4000:4000"
     environment:
       - DB_HOST=postgres
-      - DB_USER=admin
-      - DB_PASSWORD=password
-      - DB_NAME=finalcut_social
-      - JWT_SECRET=super_secret_agent_key
+      - DB_USER=${POSTGRES_USER:-admin}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      - DB_NAME=${POSTGRES_DB:-finalcut_social}
+      - JWT_SECRET=${JWT_SECRET:?Set JWT_SECRET in .env}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   web:
     build: ./frontend
@@ -43,9 +57,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=https://finalcut.ai/api
+      # In docker, the browser still calls the API directly — default to relative path
+      # via Next rewrites; override with NEXT_PUBLIC_API_URL only for prod domains.
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
     depends_on:
       - api
+    restart: unless-stopped
 
 volumes:
   postgres_data:

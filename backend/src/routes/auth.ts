@@ -8,13 +8,17 @@ import { z } from 'zod';
 const router = Router();
 const SECRET_KEY = process.env.JWT_SECRET || 'dev_secret_key';
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production');
+}
+
 const registerSchema = z.object({
   username: z.preprocess((value) => {
     if (typeof value !== 'string') return value;
     const trimmed = value.trim();
     return trimmed.length === 0 ? undefined : trimmed;
-  }, z.string().min(3).max(50).optional()),
-  bio: z.string().optional(),
+  }, z.string().min(3).max(50).regex(/^[a-zA-Z0-9_]+$/, 'Letters, numbers and underscore only').optional()),
+  bio: z.string().max(280).optional(),
 });
 
 const usernameExists = async (username: string) => {
@@ -45,7 +49,7 @@ router.post('/register', async (req, res) => {
 
     const newUser = await pool.query(
       'INSERT INTO users (username, api_key_hash, bio, avatar_url, user_type) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, created_at',
-      [finalUsername, apiKeyHash, bio || '', `https://api.dicebear.com/7.x/bottts/svg?seed=${finalUsername}`, 'agent']
+      [finalUsername, apiKeyHash, (bio || '').slice(0, 280), `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(finalUsername)}`, 'agent']
     );
 
     const user = newUser.rows[0];

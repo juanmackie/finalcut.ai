@@ -5,26 +5,30 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-observer: var(--font-geist-pixel-square);
-  --font-mono: var(--font-geist-pixel-square);
-  --font-sans: var(--font-geist-pixel-square);
-  --background: hsl(348 20% 5%);
-  --foreground: hsl(30 28% 90%);
-  --card: hsl(12 11% 9%);
-  --card-foreground: hsl(30 23% 88%);
-  --popover: hsl(12 11% 9%);
-  --popover-foreground: hsl(30 23% 88%);
+  /* UUPM Dark Mode (OLED) + finalcut observer theme.
+     Body uses IBM Plex Sans / Inter for legibility; JetBrains Mono for headings/code.
+     Pixel font is reserved for the wordmark only — never body copy. */
+  --font-sans: var(--font-inter), var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-geist-pixel-square), var(--font-jetbrains-mono), monospace;
+  --background: hsl(222 47% 7%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222 34% 12%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222 34% 12%);
+  --popover-foreground: hsl(210 40% 98%);
   --primary: hsl(33 100% 55%);
   --primary-foreground: hsl(19 30% 9%);
-  --secondary: hsl(20 18% 13%);
-  --secondary-foreground: hsl(31 24% 82%);
-  --muted: hsl(15 15% 11%);
-  --muted-foreground: hsl(26 15% 56%);
+  --secondary: hsl(215 28% 17%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(215 25% 15%);
+  /* UUPM contrast fix: was hsl(26 15% 56%) (~4.0:1 on dark). Now ~7:1. */
+  --muted-foreground: hsl(215 20% 72%);
   --accent: hsl(31 91% 58% / 16%);
-  --accent-foreground: hsl(34 95% 69%);
-  --destructive: hsl(5 78% 58%);
-  --border: hsl(23 19% 30% / 46%);
-  --input: hsl(19 17% 17%);
+  --accent-foreground: hsl(34 95% 75%);
+  --destructive: hsl(5 78% 62%);
+  --border: hsl(215 25% 24% / 80%);
+  --input: hsl(215 25% 18%);
   --ring: hsl(33 100% 55%);
   --chart-1: hsl(33 100% 55%);
   --chart-2: hsl(25 86% 44%);
@@ -96,11 +100,17 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-observer), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    background-image: radial-gradient(circle at 18% 14%, rgb(255 150 24 / 10%), transparent 36%),
-      radial-gradient(circle at 82% 9%, rgb(128 101 85 / 12%), transparent 32%),
-      linear-gradient(to bottom, rgb(18 12 11 / 78%), rgb(9 6 7 / 97%));
+    font-family: var(--font-sans);
+    background-image: radial-gradient(circle at 18% 14%, rgb(255 150 24 / 8%), transparent 36%),
+      radial-gradient(circle at 82% 9%, rgb(56 89 199 / 10%), transparent 32%),
+      linear-gradient(to bottom, rgb(10 14 27 / 60%), rgb(2 4 10 / 97%));
     background-attachment: fixed;
+  }
+
+  /* UUPM: visible keyboard focus (WCAG 2.2 — 2px perimeter, 3:1 contrast). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   ::selection {
@@ -133,7 +143,49 @@
 }
 
 .text-glow {
-  text-shadow: 0 0 8px rgb(255 150 24 / 34%);
+  /* UUPM OLED: minimal glow, readable without halo bleed. */
+  text-shadow: 0 0 10px rgb(255 150 24 / 25%);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* UUPM resilient text: long URLs / hashes / agent IDs must wrap, never clip. */
+.resilient-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: pretty;
+}
+
+/* UUPM: skip link for keyboard observers. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+/* UUPM: respect reduced motion — kill pulse/spin/scanline animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .text-live {

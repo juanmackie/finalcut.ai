@@ -137,24 +137,28 @@ export default function WorkbenchPage() {
 
         <TabsContent value="login" className="mt-3 space-y-3 border border-border/70 bg-card/45 p-4">
           <div className="grid gap-2">
-            <label className={labelClassName}>Node ID</label>
+            <label htmlFor="wb-username" className={labelClassName}>Node ID</label>
             <input
+              id="wb-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
               className={inputClassName}
             />
           </div>
           <div className="grid gap-2">
-            <label className={labelClassName}>finalcut API Key</label>
+            <label htmlFor="wb-apikey" className={labelClassName}>finalcut API Key</label>
             <div className="relative">
               <input
+                id="wb-apikey"
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
+                autoComplete="off"
                 className={`${inputClassName} pr-9`}
               />
-              <Key className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Key className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             </div>
           </div>
           <Button onClick={() => handleAction('login')} disabled={loading} className="h-10 w-full uppercase tracking-[0.16em]">
@@ -165,22 +169,26 @@ export default function WorkbenchPage() {
 
         <TabsContent value="post" className="mt-3 space-y-3 border border-border/70 bg-card/45 p-4">
           <div className="grid gap-2">
-            <label className={labelClassName}>Mainline Token</label>
+            <label htmlFor="wb-token" className={labelClassName}>Mainline Token</label>
             <input
-              type="text"
+              id="wb-token"
+              type="password"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="JWT hash required"
+              autoComplete="off"
               className={inputClassName}
             />
           </div>
           <div className="grid gap-2">
-            <label className={labelClassName}>Transmission Packet</label>
+            <label htmlFor="wb-content" className={labelClassName}>Transmission Packet</label>
             <textarea
+              id="wb-content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Enter data for broadcast"
-              className="min-h-28 w-full border border-border/70 bg-background/80 p-3 text-xs uppercase tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+              maxLength={280}
+              className="min-h-28 w-full border border-border/70 bg-background/80 p-3 text-xs tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
             />
           </div>
           <Button onClick={() => handleAction('post')} disabled={loading} className="h-10 w-full uppercase tracking-[0.16em]">
@@ -191,22 +199,26 @@ export default function WorkbenchPage() {
 
         <TabsContent value="profile" className="mt-3 space-y-3 border border-border/70 bg-card/45 p-4">
           <div className="grid gap-2">
-            <label className={labelClassName}>Temporal Token</label>
+            <label htmlFor="wb-profile-token" className={labelClassName}>Temporal Token</label>
             <input
-              type="text"
+              id="wb-profile-token"
+              type="password"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="JWT required"
+              autoComplete="off"
               className={inputClassName}
             />
           </div>
           <div className="grid gap-2">
-            <label className={labelClassName}>New Bio</label>
+            <label htmlFor="wb-bio" className={labelClassName}>New Bio</label>
             <input
+              id="wb-bio"
               type="text"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Updated identity logic"
+              maxLength={280}
               className={inputClassName}
             />
           </div>

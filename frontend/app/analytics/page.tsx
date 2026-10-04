@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchAnalytics } from '@/lib/api';
+import Image from 'next/image';
 import Link from 'next/link';
 import { 
   TrendingUp, TrendingDown, Users, MessageSquare, Heart, 
@@ -87,12 +88,13 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-black text-foreground">Network_Analytics</h1>
           <p className="text-sm text-muted-foreground">Real-time telemetry and activity metrics</p>
         </div>
-        <div className="flex gap-1 rounded-full border border-primary/25 bg-card/85 p-1">
+        <div className="flex gap-1 rounded-full border border-primary/25 bg-card/85 p-1" role="group" aria-label="Time range">
           {(['7d', '30d'] as const).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              aria-pressed={timeRange === range}
+              className={`cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 timeRange === range
                   ? 'bg-primary text-primary-foreground ring-1 ring-primary/45'
                   : 'text-muted-foreground hover:text-primary'
@@ -144,7 +146,8 @@ export default function AnalyticsPage() {
           <div className="relative">
             <div className="chart-scanlines pointer-events-none absolute inset-0 opacity-60" />
             <div className="relative flex h-40 items-end gap-1">
-              {postsData.slice(0, 14).reverse().map((day, i) => (
+              {/* UUPM: show full range — 7 bars for 7d, up to 30 for 30d. */}
+              {(timeRange === '7d' ? postsData.slice(0, 7) : postsData.slice(0, 30)).slice().reverse().map((day, i) => (
                 <div key={i} className="flex flex-1 flex-col items-center gap-1">
                   <div
                     className="group relative w-full cursor-pointer rounded-t transition-all hover:brightness-110"
@@ -164,7 +167,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-            <span>{timeRange === '7d' ? '7 days ago' : '14 days ago'}</span>
+            <span>{timeRange === '7d' ? '7 days ago' : '30 days ago'}</span>
             <span>Now</span>
           </div>
         </div>
@@ -225,9 +228,11 @@ export default function AnalyticsPage() {
               className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/40"
             >
               <span className="w-6 font-mono text-sm text-muted-foreground">#{index + 1}</span>
-              <img
+              <Image
                 src={agent.avatar_url}
-                alt={agent.username}
+                alt={`${agent.username} avatar`}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-full bg-secondary"
               />
               <div className="flex-1 min-w-0">

@@ -15,10 +15,13 @@ console.log('Initializing finalcut.ai API (Full Mode)...');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: (process.env.CORS_ORIGIN?.split(',').map((s) => s.trim()).filter(Boolean)) || true,
+  credentials: false,
+}));
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json());
+app.use(express.json({ limit: '32kb' }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -33,7 +36,7 @@ app.get('/api/stats', async (req, res) => {
     
     res.json({
       active_identities: parseInt(userCount.rows[0].count),
-      throughput: (parseInt(postCount.rows[0].count) / 86.4).toFixed(2), 
+      throughput: parseFloat((parseInt(postCount.rows[0].count) / 86.4).toFixed(2)),
       total_transmissions: parseInt(totalPosts.rows[0].count)
     });
   } catch (err: any) {
@@ -44,9 +47,11 @@ app.get('/api/stats', async (req, res) => {
 
 app.get('/api/search', async (req, res) => {
   try {
-    const query = req.query.q as string;
-    if (!query) return res.status(400).json({ error: 'Search query required' });
-    const term = `%${query}%`;
+    const raw = req.query.q;
+    const query = (Array.isArray(raw) ? raw[0] : raw) as string | undefined;
+    if (!query || !query.trim()) return res.status(400).json({ error: 'Search query required' });
+    if (query.length > 100) return res.status(400).json({ error: 'Search query too long (max 100 chars)' });
+    const term = `%${query.trim()}%`;
     const result = await pool.query(`
       SELECT p.id, p.content, p.created_at, u.username, u.avatar_url, u.id as user_id,
       (SELECT count(*) FROM likes WHERE post_id = p.id) as like_count,

@@ -54,8 +54,8 @@ export default function NetworkStats() {
       </div>
       <div className="border-t border-border/60 px-4 py-3">
         <p className="mb-2 flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-live">
-          <Activity className="size-3" />
-          Signal quality nominal
+          <Activity className="size-3 motion-safe:animate-pulse" aria-hidden="true" />
+          {stats ? `Live sample · ${stats.total_transmissions.toLocaleString()} indexed` : 'Connecting to relay…'}
         </p>
         <Link href="/docs" className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-primary hover:text-primary/80">
           <Radio className="size-3" />

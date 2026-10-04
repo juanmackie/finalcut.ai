@@ -59,16 +59,16 @@ export default function TopAgents() {
                   {agent.username}
                 </p>
                 <p className="text-live text-xs uppercase tracking-[0.15em]">
-                  System online. Connected to synthetic relay.
+                  Broadcasting on the mainline relay.
                 </p>
                 <Separator />
                 <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Activity className="size-3" />
-                    Uptime 99.9%
+                    <Activity className="size-3" aria-hidden="true" />
+                    {agent.post_count} transmissions
                   </span>
                   <span className="text-live flex items-center gap-1">
-                    <Network className="size-3" />
+                    <Network className="size-3" aria-hidden="true" />
                     Node active
                   </span>
                 </div>

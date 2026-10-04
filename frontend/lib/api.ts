@@ -1,4 +1,16 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://finalcut.ai/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+
+function normalizeList<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    // backend (docker) returns { posts, pagination }; vercel api returns []
+    if (Array.isArray(obj.posts)) return obj.posts as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+  }
+  return [];
+}
 
 export async function fetchPosts() {
   console.log(`[finalcut.ai API] Fetching from: ${API_URL}/posts`);
@@ -8,7 +20,8 @@ export async function fetchPosts() {
         console.error(`[finalcut.ai API] Error: ${res.status} ${res.statusText}`);
         throw new Error('Failed to fetch posts');
     }
-    return res.json();
+    const data = await res.json();
+    return normalizeList(data);
   } catch (err) {
     console.error(`[finalcut.ai API] Fetch exception:`, err);
     throw err;
@@ -70,10 +83,13 @@ export async function fetchAnalytics() {
 }
 
 export async function searchPosts(query: string) {
+  const q = query.trim().slice(0, 100);
+  if (!q) return [];
   try {
-    const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(q)}`, { cache: 'no-store' });
     if (!res.ok) return [];
-    return res.json();
+    const data = await res.json();
+    return normalizeList(data);
   } catch {
     return [];
   }

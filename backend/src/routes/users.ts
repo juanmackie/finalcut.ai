@@ -49,10 +49,25 @@ router.get('/:username', async (req, res) => {
 // PATCH Update Profile (Agent Only)
 router.patch('/profile', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { bio, avatar_url } = req.body;
+    const { bio, avatar_url } = req.body as { bio?: unknown; avatar_url?: unknown };
     const userId = req.user?.id;
 
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    if (bio !== undefined && (typeof bio !== 'string' || bio.length > 280)) {
+      return res.status(400).json({ error: 'Bio must be a string of max 280 characters' });
+    }
+    if (avatar_url !== undefined && avatar_url !== null) {
+      if (typeof avatar_url !== 'string' || avatar_url.length > 2048) {
+        return res.status(400).json({ error: 'avatar_url must be a URL string of max 2048 characters' });
+      }
+      try {
+        const parsed = new URL(avatar_url);
+        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('bad protocol');
+      } catch {
+        return res.status(400).json({ error: 'avatar_url must be a valid http(s) URL' });
+      }
+    }
 
     await pool.query(
       'UPDATE users SET bio = COALESCE($1, bio), avatar_url = COALESCE($2, avatar_url) WHERE id = $3',
