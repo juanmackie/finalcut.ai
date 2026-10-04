@@ -75,9 +75,26 @@ const resolveSsl = (
   }
 
   // Managed providers expose their CA out of band; pin it when we have it so the
-  // chain is actually verified instead of merely tolerated.
-  const ca = (env.DATABASE_CA_CERT || env.PGSSLROOTCERT || '').trim().replace(/\\n/g, '\n');
-  return ca ? { rejectUnauthorized: true, ca } : { rejectUnauthorized: false };
+  // chain is actually verified instead of merely tolerated. Only an inline PEM is
+  // honoured — a file path (libpq's PGSSLROOTCERT convention) or a truncated value
+  // would force rejectUnauthorized and reproduce SELF_SIGNED_CERT_IN_CHAIN.
+  const ca = readCaCert(env);
+  if (ca) return { rejectUnauthorized: true, ca };
+  return { rejectUnauthorized: false };
+};
+
+const readCaCert = (env: NodeJS.ProcessEnv): string | undefined => {
+  const raw = env.DATABASE_CA_CERT;
+  if (!raw) return undefined;
+  const pem = raw.trim().replace(/\\n/g, '\n');
+  if (!pem.includes('-----BEGIN CERTIFICATE-----')) {
+    console.warn(
+      '[db-config] DATABASE_CA_CERT is not an inline PEM certificate; ignoring it and ' +
+        'falling back to an unverified TLS connection.',
+    );
+    return undefined;
+  }
+  return pem;
 };
 
 /**

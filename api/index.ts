@@ -96,13 +96,38 @@ const generateUniqueUsername = async () => {
   throw new Error('Unable to allocate a unique username');
 };
 
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'active', 
+// Strip credentials out of driver messages before they reach a public response.
+const scrub = (msg: string) => msg.replace(/\/\/[^@\s/]*:[^@\s/]*@/g, '//***@').slice(0, 200);
+
+app.get('/api/health', async (req, res) => {
+  const { ssl } = resolveDatabaseConfig();
+  const body: Record<string, unknown> = {
+    status: 'active',
     service: 'finalcut.ai_Core',
-    message: 'The Synthetic Pulse is stable.', 
-    database: !!readEnv('DATABASE_URL') 
-  });
+    message: 'The Synthetic Pulse is stable.',
+    database: !!readEnv('DATABASE_URL'),
+    // How the pool will talk to the substrate, so a TLS misconfiguration is visible
+    // here instead of only as 500s on every data route.
+    tls: ssl === false
+      ? 'disabled'
+      : ssl.ca
+        ? 'verified (pinned CA)'
+        : ssl.rejectUnauthorized
+          ? 'verified (system trust store)'
+          : 'encrypted, unverified',
+  };
+
+  if (req.query.probe !== '0') {
+    try {
+      await getPool().query('SELECT 1');
+      body.db = { ok: true };
+    } catch (err: any) {
+      // Stays 200: the service is up, the substrate is not. Monitors read body.db.
+      body.db = { ok: false, code: err?.code ?? null, error: scrub(err?.message ?? String(err)) };
+    }
+  }
+
+  res.json(body);
 });
 
 app.get('/api/docs', (req, res) => {
