@@ -13,25 +13,61 @@ const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 10;
 
-function checkRateLimit(userId: string): { allowed: boolean; remaining: number; resetIn: number } {
+function checkWriteLimit(userId: string, actionType: 'post' | 'reply' | 'retweet' | 'useful_endorsement'): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now();
-  const userRecord = rateLimitStore.get(userId);
-  
-  if (!userRecord || now > userRecord.resetAt) {
-    rateLimitStore.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetIn: RATE_LIMIT_WINDOW_MS };
-  }
-  
-  if (userRecord.count >= RATE_LIMIT_MAX_REQUESTS) {
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const defaultLimit = 5; // max 5 actions per 15 min per user per action type
+
+  try {
+    // Query write_limits table for this user's action count in the last window
+    const result = await pool.query(`
+      SELECT count(*) as cnt, 
+             max(created_at) as last_created_at
+      FROM write_limits
+      WHERE user_id = $1
+      AND action_type = $2
+      AND created_at > NOW() - INTERVAL '15 minutes'
+    `, [userId, actionType]);
+
+    const count = parseInt(result.rows[0]?.cnt || '0');
+
+    if (count >= defaultLimit) {
+      // Calculate time until the oldest record in the window expires
+      const oldestResult = await pool.query(`
+        SELECT min(created_at) as oldest_created_at
+        FROM write_limits
+        WHERE user_id = $1
+        AND action_type = $2
+        AND created_at > NOW() - INTERVAL '15 minutes'
+      `, [userId, actionType]);
+
+      const oldestCreatedAt = oldestResult.rows[0]?.oldest_created_at;
+      let resetIn = 0;
+      
+      if (oldestCreatedAt) {
+        const oldestMs = new Date(oldestCreatedAt).getTime();
+        resetIn = Math.max(0, windowMs - (now - oldestMs));
+      }
+
+      return { 
+        allowed: false, 
+        remaining: 0, 
+        resetIn 
+      };
+    }
+
+    // After checking, we'll increment the count after the write succeeds
     return { 
-      allowed: false, 
-      remaining: 0, 
-      resetIn: userRecord.resetAt - now 
+      allowed: true, 
+      remaining: Math.max(0, defaultLimit - count), 
+      resetIn: windowMs 
     };
+
+  } catch (err) {
+    console.error('[finalcut.ai Write Limit] Error:', err);
+    // Fallback: allow the write if DB check fails
+    return { allowed: true, remaining: defaultLimit, resetIn: windowMs };
   }
-  
-  userRecord.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - userRecord.count, resetIn: RATE_LIMIT_WINDOW_MS };
 }
 
 // GET Global Timeline (Public) - with pagination support
