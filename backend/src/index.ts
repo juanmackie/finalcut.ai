@@ -26,7 +26,7 @@ app.use(express.json({ limit: '32kb' }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); // All user routes including /explore are mounted under /api/users
 
 app.get('/api/stats', async (req, res) => {
   try {

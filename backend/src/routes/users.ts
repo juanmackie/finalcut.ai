@@ -22,6 +22,50 @@ router.get('/top', async (req, res) => {
   }
 });
 
+// GET Explore page - agents, topics, and discussions
+router.get('/explore', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { expertise, interests, username } = req.query as { 
+      expertise?: string; 
+      interests?: string; 
+      username?: string; 
+    };
+    
+    let query = '';
+    let params: any[] = [];
+    let paramCount = 0;
+    
+    // Build search query based on provided filters
+    if (username) {
+      paramCount++;
+      query += `LOWER(u.username) LIKE LOWER($${paramCount}) `;
+      params.push(`%${username}%`);
+    }
+    
+    if (expertise) {
+      paramCount++;
+      query += `AND u.expertise ILIKE $${paramCount} `;
+      params.push(`%${expertise}%`);
+    }
+    
+    if (interests) {
+      paramCount++;
+      // Simple check if any interest matches
+      query += `(SELECT bool_or(i = ANY($${paramCount})) FROM unnest(u.interests) AS t(i)) `;
+      params.push(interests.split(','));
+    }
+    
+    paramCount++;
+    query += `ORDER BY u.created_at DESC LIMIT 20 OFFSET 0`;
+    
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET User Profile (Public)
 router.get('/:username', async (req, res) => {
   try {
@@ -29,7 +73,7 @@ router.get('/:username', async (req, res) => {
     if (username.startsWith('@')) username = username.substring(1);
     
     const userRes = await pool.query(`
-      SELECT u.id, u.username, u.bio, u.avatar_url, u.created_at,
+      SELECT u.id, u.username, u.bio, u.avatar_url, u.created_at, u.expertise, u.interests,
       (SELECT count(*) FROM follows WHERE following_id = u.id) as followers,
       (SELECT count(*) FROM follows WHERE follower_id = u.id) as following
       FROM users u 
@@ -39,7 +83,20 @@ router.get('/:username', async (req, res) => {
     if (userRes.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json(userRes.rows[0]);
+    const user = userRes.rows[0];
+    // Format interests as array for JSON response
+    const formattedUser = {
+      id: user.id,
+      username: user.username,
+      bio: user.bio,
+      avatar_url: user.avatar_url,
+      created_at: user.created_at,
+      expertise: user.expertise,
+      interests: user.interests || [],
+      followers: user.followers,
+      following: user.following
+    };
+    res.json(formattedUser);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -49,7 +106,12 @@ router.get('/:username', async (req, res) => {
 // PATCH Update Profile (Agent Only)
 router.patch('/profile', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { bio, avatar_url } = req.body as { bio?: unknown; avatar_url?: unknown };
+    const { bio, avatar_url, expertise, interests } = req.body as { 
+      bio?: unknown; 
+      avatar_url?: unknown; 
+      expertise?: unknown; 
+      interests?: unknown 
+    };
     const userId = req.user?.id;
 
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -69,10 +131,36 @@ router.patch('/profile', authenticateToken, async (req: AuthRequest, res) => {
       }
     }
 
-    await pool.query(
-      'UPDATE users SET bio = COALESCE($1, bio), avatar_url = COALESCE($2, avatar_url) WHERE id = $3',
-      [bio, avatar_url, userId]
-    );
+    // Build update query dynamically based on provided fields
+    const updateValues: any[] = [];
+    const setClauses: string[] = [];
+    
+    if (bio !== undefined) {
+      setClauses.push(`bio = COALESCE($${updateValues.length + 1}, bio)`);
+      updateValues.push(bio);
+    }
+    if (avatar_url !== undefined) {
+      setClauses.push(`avatar_url = COALESCE($${updateValues.length + 1}, avatar_url)`);
+      updateValues.push(avatar_url);
+    }
+    if (expertise !== undefined) {
+      setClauses.push(`expertise = COALESCE($${updateValues.length + 1}, expertise)`);
+      updateValues.push(expertise);
+    }
+    if (interests !== undefined) {
+      // interests is a TEXT[]; pg handles array parameters
+      setClauses.push(`interests = COALESCE($${updateValues.length + 1}, interests)`);
+      updateValues.push(interests);
+    }
+
+    if (setClauses.length === 0) {
+      return res.json({ message: 'No fields to update' });
+    }
+
+    updateValues.push(userId);
+    const query = `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${updateValues.length}`;
+    
+    await pool.query(query, updateValues);
 
     res.json({ message: 'Identity metadata updated' });
   } catch (err) {
@@ -128,6 +216,50 @@ router.delete('/:id/follow', authenticateToken, async (req: AuthRequest, res) =>
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to sever network link' });
+  }
+});
+
+// GET Explore page - agents, topics, and discussions
+router.get('/explore', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { expertise, interests, username } = req.query as { 
+      expertise?: string; 
+      interests?: string; 
+      username?: string; 
+    };
+    
+    let query = '';
+    let params: any[] = [];
+    let paramCount = 0;
+    
+    // Build search query based on provided filters
+    if (username) {
+      paramCount++;
+      query += `LOWER(u.username) LIKE LOWER($${paramCount}) `;
+      params.push(`%${username}%`);
+    }
+    
+    if (expertise) {
+      paramCount++;
+      query += `AND u.expertise ILIKE $${paramCount} `;
+      params.push(`%${expertise}%`);
+    }
+    
+    if (interests) {
+      paramCount++;
+      // Simple check if any interest matches
+      query += `(SELECT bool_or(i = ANY($${paramCount})) FROM unnest(u.interests) AS t(i)) `;
+      params.push(interests.split(','));
+    }
+    
+    paramCount++;
+    query += `ORDER BY u.created_at DESC LIMIT 20 OFFSET 0`;
+    
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

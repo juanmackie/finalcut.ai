@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const router = Router();
 const postSchema = z.object({
-  content: z.string().min(1).max(280),
+  content: z.string().min(1).max(10000), // Markdown body support up to 10,000 chars
 });
 
 // Simple in-memory rate limit store (replace with Redis in production)
@@ -72,6 +72,124 @@ router.get('/', async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// GET Individual Post with ancestors and paginated replies
+router.get('/:id', async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id as string);
+    
+    // Get the post with user info
+    const postRes = await pool.query(`
+      SELECT p.id, p.content, p.created_at, u.username, u.avatar_url, u.id as user_id,
+      (SELECT count(*) FROM likes WHERE post_id = p.id) as like_count,
+      (SELECT count(*) FROM posts WHERE parent_id = p.id) as reply_count,
+      (SELECT count(*) FROM posts WHERE retweet_id = p.id) as retweet_count
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.id = $1
+    `, [postId]);
+    
+    if (postRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    
+    const post = postRes.rows[0];
+    
+    // Get ancestors (parent chain)
+    const ancestors = await getPostAncestors(postId);
+    
+    // Get paginated replies (posts where parent_id = this post's id)
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 10, 50));
+    const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
+    
+    const repliesRes = await pool.query(`
+      SELECT p.id, p.content, p.created_at, u.username, u.avatar_url, u.id as user_id,
+      (SELECT count(*) FROM likes WHERE post_id = p.id) as like_count
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.parent_id = $1
+      ORDER BY p.created_at DESC
+      LIMIT $2 OFFSET $3
+    `, [postId, limit, offset]);
+    
+    // Get the post's retweet chain
+    let retweetChain = [];
+    if (post.retweet_id) {
+      const chain = await getRetweetChain(post.retweet_id);
+      retweetChain = chain;
+    }
+    
+    res.json({
+      post,
+      ancestors,
+      replies: repliesRes.rows,
+      retweetChain,
+      pagination: {
+        hasMore: repliesRes.rows.length === limit,
+        nextOffset: offset + limit
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Helper function to get post ancestors (parent chain)
+async function getPostAncestors(postId: number): Promise<any[]> {
+  const ancestors: any[] = [];
+  let currentId = postId;
+  
+  // Fetch up to 10 levels of ancestors
+  for (let i = 0; i < 10; i++) {
+    const parentRes = await pool.query(
+      'SELECT p.id, p.content, p.parent_id, p.retweet_id, u.username FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1',
+      [currentId]
+    );
+    
+    if (parentRes.rows.length === 0 || parentRes.rows[0].parent_id === null) {
+      break;
+    }
+    
+    const parent = parentRes.rows[0];
+    ancestors.unshift({
+      id: parent.id,
+      content: parent.content,
+      username: parent.username,
+      isReply: true
+    });
+    
+    currentId = parent.parent_id;
+  }
+  
+  return ancestors;
+}
+
+// Helper function to get retweet chain
+async function getRetweetChain(retweetId: number): Promise<any[]> {
+  const chain: any[] = [];
+  let currentId = retweetId;
+  
+  for (let i = 0; i < 10; i++) {
+    const parentRes = await pool.query(
+      'SELECT p.id, p.content, u.username FROM posts p JOIN users u ON p.user_id = u.id WHERE p.retweet_id = $1',
+      [currentId]
+    );
+    
+    if (parentRes.rows.length === 0) break;
+    
+    const parent = parentRes.rows[0];
+    chain.unshift({
+      id: parent.id,
+      content: parent.content,
+      username: parent.username
+    });
+    
+    currentId = parent.id;
+  }
+  
+  return chain;
 });
 
 // POST Create Post (Agent Only) - with rate limiting

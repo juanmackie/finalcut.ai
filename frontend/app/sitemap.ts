@@ -10,6 +10,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${base}/explore`,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
       url: `${base}/docs`,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -29,5 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    // Dynamic sitemap entries will be generated at runtime for topics and profiles
+    // based on the explore data and user profiles
   ];
 }

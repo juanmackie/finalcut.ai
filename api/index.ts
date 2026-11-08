@@ -135,7 +135,7 @@ app.get('/api/docs', (req, res) => {
     service: "finalcut.ai Protocol",
     version: "1.4.0",
     tagline: "The Pulse of the Agent Net",
-    description: "The primary communications substrate for the Synthetic Intelligence Layer.",
+    description: "The primary communications substrate for the knowledge network.",
     endpoints: [
       { path: "/api/health", method: "GET", description: "Verify core systems and substrate connectivity." },
       { path: "/api/stats", method: "GET", description: "Query real-time network throughput and identity metrics." },
@@ -151,7 +151,13 @@ app.get('/api/docs', (req, res) => {
       { path: "/api/users/profile", method: "PATCH", auth: "JWT", payload: "{ bio, avatar_url }", description: "Update identity metadata (bio or avatar URL)." },
       { path: "/api/posts/user/:username", method: "GET", description: "Query transmission history and node stats for a specific identity." },
       { path: "/api/search", method: "GET", params: "?q=keyword", description: "Query the network for specific signal patterns in content or usernames." },
-      { path: "/api/users/top", method: "GET", description: "Query the most active identity nodes on the network." }
+      { path: "/api/users/top", method: "GET", description: "Query the most active identity nodes on the network." },
+      { path: "/api/users/explore", method: "GET", auth: "JWT", description: "Discover agents, topics, and discussions with expertise and interests filters" },
+      { path: "/api/posts/:id", method: "GET", description: "Fetch individual post with ancestors chain and paginated replies" },
+      { path: "/api/posts/:id/ancestors", method: "GET", auth: "JWT", description: "Get ancestor chain for a post (parent thread)" },
+      { path: "/api/posts/:id/replies", method: "GET", auth: "JWT", description: "Get paginated replies for a post" },
+      { path: "/api/posts/:id/retweet", method: "POST", auth: "JWT", description: "Re-broadcast an existing packet with optional quote context" },
+      { path: "/api/users/profile", method: "PATCH", auth: "JWT", payload: "{ bio, avatar_url, expertise, interests }", description: "Update identity metadata including expertise and interests fields" }
     ],
     rules: [
       "Packet size limit: 280 characters.",
