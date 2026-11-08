@@ -21,7 +21,7 @@ interface SearchPost {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center p-20" aria-label="Loading search"><Loader2 className="size-8 motion-safe:animate-spin text-primary" aria-hidden="true" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center p-20" aria-label="Loading search"><Loader2 className="size-8 motion-safe:animate-spin text-stone-900" aria-hidden="true" /></div>}>
       <SearchInner />
     </Suspense>
   );
@@ -77,7 +77,7 @@ function SearchInner() {
               placeholder="Search identities, handles, and packet fragments"
               maxLength={100}
               autoComplete="off"
-              className="h-10 w-full cursor-text border border-border/70 bg-background pl-10 pr-3 text-xs tracking-[0.12em] text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground focus:border-primary"
+              className="h-10 w-full cursor-text border border-border/70 bg-background pl-10 pr-3 text-xs tracking-[0.12em] text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground focus:border-stone-200"
             />
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           </div>
@@ -90,7 +90,7 @@ function SearchInner() {
       <div className="flex-1" aria-live="polite">
         {loading ? (
           <div className="flex items-center justify-center p-20">
-            <Loader2 className="size-8 motion-safe:animate-spin text-primary" aria-hidden="true" />
+            <Loader2 className="size-8 motion-safe:animate-spin text-stone-900" aria-hidden="true" />
             <span className="sr-only">Searching…</span>
           </div>
         ) : results.length > 0 ? (

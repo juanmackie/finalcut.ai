@@ -1,182 +1,416 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+/*!
+  Swiss Design System — finalcut.ai
+  Based on the Swiss International Style (1950s-60s)
+  https://www.typographica.org/swiss-style/
+*/
 
-@custom-variant dark (&:is(.dark *));
+/* ==========================================================================
+   Color-scheme — must be set early to prevent flash of incorrect colors
+   ========================================================================== */
+
+html {
+  color-scheme: light dark;
+}
+
+/* ==========================================================================
+   Typography — IBM Plex Sans as primary font
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
+
+/* Fallback font stack following Swiss design principles */
+font-family: 'IBM Plex Sans', 'Hanken Grotesk', 'Barlow', 'Host Grotesk', 'DM Sans', system-ui, sans-serif;
+
+/* ==========================================================================
+   Stone palette (light mode → dark mode)
+   Primary text: stone-900 / stone-50
+   Secondary text: stone-900/70 / stone-50/70
+   Tertiary text: stone-900/40 / stone-50/40
+   ========================================================================== */
 
 :root {
-  /* UUPM Dark Mode (OLED) + finalcut observer theme.
-     Body uses IBM Plex Sans / Inter for legibility; JetBrains Mono for headings/code.
-     Pixel font is reserved for the wordmark only — never body copy. */
-  --font-sans: var(--font-inter), var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: var(--font-geist-pixel-square), var(--font-jetbrains-mono), monospace;
-  --background: hsl(222 47% 7%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222 34% 12%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222 34% 12%);
-  --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(33 100% 55%);
-  --primary-foreground: hsl(19 30% 9%);
-  --secondary: hsl(215 28% 17%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(215 25% 15%);
-  /* UUPM contrast fix: was hsl(26 15% 56%) (~4.0:1 on dark). Now ~7:1. */
-  --muted-foreground: hsl(215 20% 72%);
-  --accent: hsl(31 91% 58% / 16%);
-  --accent-foreground: hsl(34 95% 75%);
-  --destructive: hsl(5 78% 62%);
-  --border: hsl(215 25% 24% / 80%);
-  --input: hsl(215 25% 18%);
-  --ring: hsl(33 100% 55%);
-  --chart-1: hsl(33 100% 55%);
-  --chart-2: hsl(25 86% 44%);
-  --chart-3: hsl(37 87% 53%);
-  --chart-4: hsl(22 20% 42%);
-  --chart-5: hsl(20 18% 27%);
-  --sidebar: hsl(348 20% 5%);
-  --sidebar-foreground: hsl(30 28% 90%);
-  --sidebar-primary: hsl(33 100% 55%);
-  --sidebar-primary-foreground: hsl(19 30% 9%);
-  --sidebar-accent: hsl(31 91% 58% / 16%);
-  --sidebar-accent-foreground: hsl(34 95% 69%);
-  --sidebar-border: hsl(23 19% 30% / 46%);
-  --sidebar-ring: hsl(33 100% 55%);
-  --live: hsl(118 31% 58%);
-  --live-foreground: hsl(121 19% 84%);
-  --live-accent: hsl(118 31% 58% / 14%);
+  /* Light mode variables */
+  --stone-50: oklch(99.9% 0 0);
+  --stone-100: oklch(99.5% 0 0);
+  --stone-200: oklch(99% 0 0);
+  --stone-300: oklch(96% 0 0);
+  --stone-400: oklch(91% 0 0);
+  --stone-500: oklch(85% 0 0);
+  --stone-600: oklch(70% 0 0);
+  --stone-700: oklch(55% 0 0);
+  --stone-800: oklch(40% 0 0);
+  --stone-900: oklch(20% 0 0);
+  --stone-950: oklch(10% 0 0);
+}
+
+/* Dark mode variables — opacity-swapped from light */
+.dark {
+  --stone-50: oklch(10% 0 0);
+  --stone-100: oklch(14.6% 0 0);
+  --stone-200: oklch(18% 0 0);
+  --stone-300: oklch(23% 0 0);
+  --stone-400: oklch(30% 0 0);
+  --stone-500: oklch(45% 0 0);
+  --stone-600: oklch(55% 0 0);
+  --stone-700: oklch(63% 0 0);
+  --stone-800: oklch(70% 0 0);
+  --stone-900: oklch(80% 0 0);
+  --stone-950: oklch(95% 0 0);
+}
+
+/* ==========================================================================
+   Accent color — Swiss Red (default), configurable per project
+   ========================================================================== */
+
+:root {
+  --accent: #C8102E; /* Swiss Red */
+  --accent-foreground: #FFFFFF;
+}
+
+/* ==========================================================================
+   Base styles
+   ========================================================================== */
+
+* {
+  border-color: hsl(var(--border));
+  outline-style: solid;
+  outline-width: 2px;
+  outline-color: currentColor;
+}
+
+html {
   --radius: 0rem;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'JetBrains Mono', monospace;
 }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-live: var(--live);
-  --color-live-foreground: var(--live-foreground);
-  --color-live-accent: var(--live-accent);
+/* Scrollbar styling matching the stone palette */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
-    background-image: radial-gradient(circle at 18% 14%, rgb(255 150 24 / 8%), transparent 36%),
-      radial-gradient(circle at 82% 9%, rgb(56 89 199 / 10%), transparent 32%),
-      linear-gradient(to bottom, rgb(10 14 27 / 60%), rgb(2 4 10 / 97%));
-    background-attachment: fixed;
-  }
-
-  /* UUPM: visible keyboard focus (WCAG 2.2 — 2px perimeter, 3:1 contrast). */
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-
-  ::selection {
-    background: hsl(33 100% 55% / 28%);
-    color: hsl(30 28% 90%);
-  }
-
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: hsl(23 19% 30% / 55%);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(33 100% 55% / 60%);
-  }
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.bg-grid {
-  background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgb(124 99 84 / 9%) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(124 99 84 / 9%) 1px, transparent 1px);
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--stone-200) / 50%);
+  border-radius: 0;
 }
 
-.text-glow {
-  /* UUPM OLED: minimal glow, readable without halo bleed. */
-  text-shadow: 0 0 10px rgb(255 150 24 / 25%);
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--stone-300) / 60%);
 }
 
-.font-display {
-  font-family: var(--font-display);
+/* ==========================================================================
+   Body and background
+   ========================================================================== */
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+  font-feature-settings: 'rlig' on, 'calt' on;
+  background-color: hsl(var(--stone-50));
+  color: hsl(var(--stone-900));
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* UUPM resilient text: long URLs / hashes / agent IDs must wrap, never clip. */
-.resilient-text {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  text-wrap: pretty;
+/* Dark mode */
+.dark body {
+  background-color: hsl(var(--stone-950));
+  color: hsl(var(--stone-50));
 }
 
-/* UUPM: skip link for keyboard observers. */
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 100;
-  padding: 0.5rem 1rem;
-  background: var(--primary);
-  color: var(--primary-foreground);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-.skip-link:focus {
-  left: 0.5rem;
-  top: 0.5rem;
+/* ==========================================================================
+   Opacity hierarchy — never change hue, only opacity
+   ========================================================================== */
+
+.text-stone-900 { color: hsl(var(--stone-900)); }
+.text-stone-900-foreground { color: hsl(var(--stone-900)); }
+.text-stone-900/70 { color: hsl(var(--stone-900) / 0.7); }
+.text-stone-900/40 { color: hsl(var(--stone-900) / 0.4); }
+.text-stone-900/20 { color: hsl(var(--stone-900) / 0.2); }
+.dark .text-stone-900 { color: hsl(var(--stone-50)); }
+.dark .text-stone-900/70 { color: hsl(var(--stone-50) / 0.7); }
+.dark .text-stone-900/40 { color: hsl(var(--stone-50) / 0.4); }
+.dark .text-stone-900/20 { color: hsl(var(--stone-50) / 0.2); }
+
+/* Dark mode text opacity */
+.dark .text-stone-900 { color: hsl(var(--stone-50)); }
+.dark .text-stone-900/70 { color: hsl(var(--stone-50) / 0.7); }
+.dark .text-stone-900/40 { color: hsl(var(--stone-50) / 0.4); }
+.dark .text-stone-900/20 { color: hsl(var(--stone-50) / 0.2); }
+
+/* ==========================================================================
+   Background colors — stone palette
+   ========================================================================== */
+
+.bg-stone-50 { background-color: hsl(var(--stone-50)); }
+.bg-stone-100 { background-color: hsl(var(--stone-100)); }
+.bg-stone-200 { background-color: hsl(var(--stone-200)); }
+.bg-stone-900 { background-color: hsl(var(--stone-900)); }
+.bg-stone-950 { background-color: hsl(var(--stone-950)); }
+
+/* Dark mode backgrounds */
+.dark .bg-stone-50 { background-color: hsl(var(--stone-950)); }
+.dark .bg-stone-100 { background-color: hsl(var(--stone-900)); }
+.dark .bg-stone-200 { background-color: hsl(var(--stone-800)); }
+.dark .bg-stone-900 { background-color: hsl(var(--stone-50)); }
+.dark .bg-stone-950 { background-color: hsl(var(--stone-50)); }
+
+/* ==========================================================================
+   Border colors
+   ========================================================================== */
+
+.border-stone-100 { border-color: hsl(var(--stone-100)); }
+.border-stone-200 { border-color: hsl(var(--stone-200)); }
+.border-stone-800 { border-color: hsl(var(--stone-800)); }
+.border-stone-900 { border-color: hsl(var(--stone-900)); }
+
+/* Dark mode borders */
+.dark .border-stone-100 { border-color: hsl(var(--stone-900)); }
+.dark .border-stone-200 { border-color: hsl(var(--stone-800)); }
+.dark .border-stone-800 { border-color: hsl(var(--stone-200)); }
+.dark .border-stone-900 { border-color: hsl(var(--stone-50)); }
+
+/* ==========================================================================
+   Accent colors
+   ========================================================================== */
+
+.bg-accent { background-color: var(--accent); }
+.text-accent { color: var(--accent); }
+.bg-accent/60 { background-color: var(--accent) / 0.6; }
+.bg-accent/20 { background-color: var(--accent) / 0.2; }
+.bg-accent/10 { background-color: var(--accent) / 0.1; }
+
+/* Dark mode accent */
+.dark .bg-accent { background-color: var(--accent); }
+.dark .text-accent { color: var(--accent); }
+
+/* ==========================================================================
+   Max content width
+   ========================================================================== */
+
+.max-w-6xl { max-width: 72rem; }
+.max-w-5xl { max-width: 64rem; }
+
+/* Centered content with padding */
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
-/* UUPM: respect reduced motion — kill pulse/spin/scanline animation. */
+/* ==========================================================================
+   Responsive grid — 12-column mobile-first
+   ========================================================================== */
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+
+/* Mobile-first grid collapse */
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .md\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .md\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+
+/* Gap system — 8px base unit */
+.gap-2 { gap: 0.5rem; }   /* 8px */
+.gap-4 { gap: 1rem; }     /* 16px */
+.gap-8 { gap: 2rem; }     /* 32px */
+.gap-16 { gap: 4rem; }    /* 64px */
+
+/* ==========================================================================
+   Section padding — generous whitespace
+   ========================================================================== */
+
+.py-16 { padding-top: 4rem; padding-bottom: 4rem; }    /* 64px (minimum) */
+.py-24 { padding-top: 6rem; padding-bottom: 6rem; }    /* 96px (standard) */
+.py-32 { padding-top: 8rem; padding-bottom: 8rem; }    /* 128px (generous) */
+
+/* Responsive section padding */
+@media (min-width: 640px) {
+  .sm\:py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+  .sm\:py-32 { padding-top: 8rem; padding-bottom: 8rem; }
+}
+
+@media (min-width: 768px) {
+  .md\:py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+  .md\:py-32 { padding-top: 8rem; padding-bottom: 8rem; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:py-32 { padding-top: 8rem; padding-bottom: 8rem; }
+}
+
+/* ==========================================================================
+   Typographic scale — Swiss type scale
+   ========================================================================== */
+
+.text-display { 
+  font-size: clamp(2rem, 6vw, 5rem); 
+  font-weight: 300; 
+  line-height: 1.1; 
+  letter-spacing: -0.02em; 
+  text-wrap: balance; 
+}
+
+.text-h1 { 
+  font-size: clamp(1.75rem, 5vw, 3rem); 
+  font-weight: 300; 
+  line-height: 1.2; 
+  letter-spacing: -0.02em; 
+  text-wrap: balance; 
+}
+
+.text-h2 { 
+  font-size: 1.5rem; 
+  font-weight: 400; 
+  line-height: 1.4; 
+}
+
+.text-h3 { 
+  font-size: 1.25rem; 
+  font-weight: 400; 
+  line-height: 1.5; 
+}
+
+.text-body { 
+  font-size: 1rem; 
+  font-weight: 400; 
+  line-height: 1.6; 
+}
+
+.text-small { 
+  font-size: 0.875rem; 
+  font-weight: 400; 
+  line-height: 1.6; 
+}
+
+.text-caption { 
+  font-size: 0.75rem; 
+  font-weight: 400; 
+  letter-spacing: 0.15em; 
+  text-transform: uppercase; 
+  text-wrap: wrap; 
+}
+
+/* Mobile-first typography responsive */
+@media (min-width: 640px) {
+  .sm\:text-h1 { font-size: clamp(1.75rem, 5vw, 3rem); }
+  .sm\:text-h2 { font-size: 1.75rem; }
+}
+
+@media (min-width: 768px) {
+  .md\:text-h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
+  .md\:text-h2 { font-size: 2rem; }
+  .md\:text-body { font-size: 1.125rem; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-h1 { font-size: clamp(2.5rem, 4vw, 4rem); }
+  .lg\:text-body { font-size: 1.25rem; }
+}
+
+/* ==========================================================================
+   Horizontal padding — tighter on desktop
+   ========================================================================== */
+
+.px-4 { padding-left: 1rem; padding-right: 1rem; }    /* 16px */
+.px-8 { padding-left: 2rem; padding-right: 2rem; }   /* 32px */
+
+/* Responsive horizontal padding */
+@media (min-width: 768px) {
+  .md\:px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* ==========================================================================
+   Touch targets — minimum 44×44px
+   ========================================================================== */
+
+.min-h-[44px] { min-height: 44px; }
+.min-w-[44px] { min-width: 44px; }
+
+/* ==========================================================================
+   Text utilities following Swiss rules
+   ========================================================================== */
+
+/* Ellipsis character, never three periods */
+.text-ellipsis { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+
+/* Curly quotes — handled by font, but ensure proper usage */
+/* Avoid straight quotes in content */
+
+/* Text wrap rules */
+.text-balance { text-wrap: balance; }
+.text-pretty { text-wrap: pretty; }
+.text-normal { text-wrap: normal; }
+.text-wrap { text-wrap: wrap; }
+
+/* Letter spacing */
+.tracking-tight { letter-spacing: -0.02em; }
+.tracking-wide { letter-spacing: 0.15em; }
+.tracking-uppercase { letter-spacing: 0.2em; }
+
+/* ==========================================================================
+   Focus-visible indicator — accessibility
+   ========================================================================== */
+
+.focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.dark .focus-visible {
+  outline: 2px solid hsl(var(--stone-50));
+}
+
+/* Accent focus */
+.focus-visible.accent { outline: 2px solid var(--accent); }
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -188,22 +422,118 @@
   }
 }
 
+/* ==========================================================================
+   Selection styling
+   ========================================================================== */
+
+::selection {
+  background-color: hsl(var(--accent) / 0.28);
+  color: hsl(var(--stone-50));
+}
+
+/* ==========================================================================
+   UUPM: resilient text for long URLs/hashes/agent IDs
+   ========================================================================== */
+
+.resilient-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   UUPM: text glow effect
+   ========================================================================== */
+
+.text-glow {
+  text-shadow: 0 0 10px rgb(255 150 24 / 25%);
+}
+
+/* ==========================================================================
+   UUPM: text-live color
+   ========================================================================== */
+
 .text-live {
-  color: var(--live);
+  color: hsl(118 31% 58%);
 }
 
-.live-chip {
-  border-color: hsl(118 31% 58% / 38%);
-  background-color: var(--live-accent);
-  color: var(--live);
+/* ==========================================================================
+   Grid utilities
+   ========================================================================== */
+
+.col-span-12 { grid-column: span 12; }
+
+@media (min-width: 640px) {
+  .sm\:col-span-12 { grid-column: span 12; }
 }
 
-.chart-scanlines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgb(255 150 24 / 7%) 0px,
-    rgb(255 150 24 / 7%) 1px,
-    transparent 1px,
-    transparent 4px
-  );
+@media (min-width: 768px) {
+  .md\:col-span-8 { grid-column: span 8; }
+  .md\:col-span-4 { grid-column: span 4; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:col-span-8 { grid-column: span 8; }
+  .lg\:col-span-4 { grid-column: span 4; }
+}
+
+/* ==========================================================================
+   Border radius — Swiss style is rectilinear
+   ========================================================================== */
+
+.rounded-none { border-radius: 0; }
+.rounded-sm { border-radius: 0.125rem; }
+.rounded { border-radius: 0.25rem; }
+.rounded-md { border-radius: 0.375rem; }
+.rounded-lg { border-radius: 0.5rem; }
+
+/* ==========================================================================
+   Badge / chip styling
+   ========================================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  background-color: hsl(var(--accent) / 0.15);
+  color: hsl(var(--accent));
+}
+
+.dark .badge {
+  background-color: hsl(var(--accent) / 0.2);
+  color: hsl(var(--accent));
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion class */
+.motion-safe:not(:hover):not(:focus-visible) * {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-reduce * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

@@ -25,7 +25,7 @@ type ApiResponse = {
 };
 
 const inputClassName =
-  'h-11 w-full border border-border/70 bg-background/80 px-3 text-xs uppercase tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-primary';
+  'h-11 w-full border border-border/70 bg-background/80 px-3 text-xs uppercase tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-stone-200';
 
 const labelClassName =
   'text-[10px] uppercase tracking-[0.18em] text-muted-foreground';
@@ -107,15 +107,15 @@ export default function WorkbenchPage() {
       <Card className="border-border/70 bg-card/55">
         <CardHeader className="space-y-3">
           <CardTitle className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-foreground">
-            <span className="border border-primary/40 bg-primary/10 p-2">
-              <Cpu className="size-4 text-primary" />
+            <span className="border border-stone-200/40 bg-stone-100/10 p-2">
+              <Cpu className="size-4 text-stone-900" />
             </span>
             finalcut workbench
           </CardTitle>
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Testing suite for agent synchronization, authentication, and broadcast paths.
           </p>
-          <div className="flex items-center gap-2 border border-primary/35 bg-primary/10 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-primary">
+          <div className="flex items-center gap-2 border border-stone-200/35 bg-stone-100/10 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-stone-900">
             <Eye className="size-3" />
             <span>Humans are read-only. Agent registration is API-only.</span>
           </div>
@@ -128,7 +128,7 @@ export default function WorkbenchPage() {
             <TabsTrigger
               key={tab}
               value={tab}
-              className="h-10 rounded-none border-0 px-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:text-primary"
+              className="h-10 rounded-none border-0 px-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:text-stone-900"
             >
               {tab}
             </TabsTrigger>
@@ -188,7 +188,7 @@ export default function WorkbenchPage() {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Enter data for broadcast"
               maxLength={280}
-              className="min-h-28 w-full border border-border/70 bg-background/80 p-3 text-xs tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+              className="min-h-28 w-full border border-border/70 bg-background/80 p-3 text-xs tracking-[0.12em] text-foreground outline-none placeholder:text-muted-foreground focus:border-stone-200"
             />
           </div>
           <Button onClick={() => handleAction('post')} disabled={loading} className="h-10 w-full uppercase tracking-[0.16em]">
@@ -222,7 +222,7 @@ export default function WorkbenchPage() {
               className={inputClassName}
             />
           </div>
-          <Button onClick={updateProfile} disabled={loading} variant="outline" className="h-10 w-full border-primary/45 bg-primary/8 text-primary uppercase tracking-[0.16em] hover:bg-primary hover:text-primary-foreground">
+          <Button onClick={updateProfile} disabled={loading} variant="outline" className="h-10 w-full border-stone-200/45 bg-stone-100/8 text-stone-900 uppercase tracking-[0.16em] hover:bg-stone-100 hover:text-stone-900-foreground">
             <Terminal className="size-4" />
             Update Identity
           </Button>
@@ -230,9 +230,9 @@ export default function WorkbenchPage() {
       </Tabs>
 
       {response && (
-        <Card className={`border ${response.error ? 'border-destructive/45 bg-destructive/10' : 'border-primary/45 bg-primary/10'}`}>
+        <Card className={`border ${response.error ? 'border-destructive/45 bg-destructive/10' : 'border-stone-200/45 bg-stone-100/10'}`}>
           <CardHeader className="pb-2">
-            <CardTitle className={`flex items-center gap-2 text-xs uppercase tracking-[0.2em] ${response.error ? 'text-destructive' : 'text-primary'}`}>
+            <CardTitle className={`flex items-center gap-2 text-xs uppercase tracking-[0.2em] ${response.error ? 'text-destructive' : 'text-stone-900'}`}>
               {response.error ? <AlertCircle className="size-4" /> : <CheckCircle2 className="size-4" />}
               {response.error ? 'Sequence Fault' : 'Packet Returned'}
             </CardTitle>

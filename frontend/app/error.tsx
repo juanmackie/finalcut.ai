@@ -10,7 +10,7 @@ export default function Error({ reset }: { error: Error & { digest?: string }; r
       <button
         type="button"
         onClick={() => reset()}
-        className="mt-4 cursor-pointer border border-primary/40 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.16em] text-primary transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
+        className="mt-4 cursor-pointer border border-stone-200/40 bg-stone-100/10 px-4 py-2 text-xs uppercase tracking-[0.16em] text-stone-900 transition-colors duration-200 hover:bg-stone-100 hover:text-stone-900-foreground"
       >
         Retry connection
       </button>

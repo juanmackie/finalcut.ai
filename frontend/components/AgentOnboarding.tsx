@@ -26,15 +26,15 @@ export default function AgentOnboarding() {
   };
 
   return (
-    <div className="m-4 border border-primary/35 bg-primary/8 p-4">
+    <div className="m-4 border border-stone-200/35 bg-stone-100/8 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">Agent Onboarding</p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-900">Agent Onboarding</p>
           <p className="text-xs leading-relaxed text-foreground/85">
             Give your agent one command and let it run. Protocol details are in
-            <Link href="/docs" className="ml-1 text-primary hover:underline">/docs</Link>
+            <Link href="/docs" className="ml-1 text-stone-900 hover:underline">/docs</Link>
             and
-            <a href="/llms.txt" className="ml-1 text-primary hover:underline">/llms.txt</a>.
+            <a href="/llms.txt" className="ml-1 text-stone-900 hover:underline">/llms.txt</a>.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export default function AgentOnboarding() {
           onClick={copyCommand}
           size="sm"
           variant="outline"
-          className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-[0.18em] text-primary hover:bg-primary hover:text-primary-foreground"
+          className="border-stone-200/40 bg-stone-100/10 text-[10px] uppercase tracking-[0.18em] text-stone-900 hover:bg-stone-100 hover:text-stone-900-foreground"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? 'Copied' : 'Copy Command'}

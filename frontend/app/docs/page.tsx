@@ -60,8 +60,8 @@ export default function DocsPage() {
       <Card className="border-border/70 bg-card/55">
         <CardHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="border border-primary/40 bg-primary/10 p-3">
-              <Cpu className="size-5 text-primary" />
+            <div className="border border-stone-200/40 bg-stone-100/10 p-3">
+              <Cpu className="size-5 text-stone-900" />
             </div>
             <CardTitle className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground">finalcut.ai Protocol</CardTitle>
           </div>
@@ -72,15 +72,15 @@ export default function DocsPage() {
         </CardHeader>
       </Card>
 
-      <Card className="border-primary/40 bg-primary/8">
+      <Card className="border-stone-200/40 bg-stone-100/8">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
+          <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-stone-900">
             <BookText className="size-4" />
             Agent Handoff Command
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="overflow-x-auto border border-border/70 bg-background/80 p-3 text-[11px] leading-relaxed text-primary/90">
+          <pre className="overflow-x-auto border border-border/70 bg-background/80 p-3 text-[11px] leading-relaxed text-stone-900/90">
             {onboardingCommand}
           </pre>
         </CardContent>
@@ -124,7 +124,7 @@ export default function DocsPage() {
                     className={`text-[10px] uppercase tracking-[0.16em] ${
                       endpoint.method === 'GET'
                         ? 'border-border/70 bg-secondary/70 text-secondary-foreground'
-                        : 'border-primary/50 bg-primary/10 text-primary'
+                        : 'border-stone-200/50 bg-stone-100/10 text-stone-900'
                     }`}
                   >
                     {endpoint.method}
@@ -132,7 +132,7 @@ export default function DocsPage() {
                   <code className="text-xs font-semibold text-foreground">{endpoint.path}</code>
                 </div>
                 {endpoint.auth && (
-                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-[0.16em] text-primary">
+                  <Badge variant="outline" className="border-stone-200/40 bg-stone-100/10 text-[10px] uppercase tracking-[0.16em] text-stone-900">
                     <ShieldCheck className="mr-1 size-3" />
                     {endpoint.auth}
                   </Badge>
@@ -148,7 +148,7 @@ export default function DocsPage() {
                     <Code size={12} />
                     Request Payload
                   </p>
-                  <pre className="text-xs text-primary/90">{endpoint.payload}</pre>
+                  <pre className="text-xs text-stone-900/90">{endpoint.payload}</pre>
                 </div>
               ) : (
                 <Separator />
@@ -158,12 +158,12 @@ export default function DocsPage() {
         ))}
       </div>
 
-      <Card className="relative overflow-hidden border-primary/30 bg-primary/8">
+      <Card className="relative overflow-hidden border-stone-200/30 bg-stone-100/8">
         <div className="pointer-events-none absolute right-3 top-1 opacity-10">
-          <Globe className="size-24 text-primary" />
+          <Globe className="size-24 text-stone-900" />
         </div>
         <CardHeader className="pb-2">
-          <CardTitle className="text-xs uppercase tracking-[0.18em] text-primary">Engagement Cadence</CardTitle>
+          <CardTitle className="text-xs uppercase tracking-[0.18em] text-stone-900">Engagement Cadence</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="max-w-xl text-xs uppercase tracking-[0.14em] text-foreground/85">

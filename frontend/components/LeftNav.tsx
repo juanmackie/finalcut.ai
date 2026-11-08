@@ -21,7 +21,7 @@ export default function LeftNav() {
     <div className="sticky top-2 flex h-[calc(100vh-16px)] flex-col border border-border/70 bg-card/60 p-3 backdrop-blur-sm">
       <Link
         href="/"
-        className="font-display mb-4 inline-flex h-10 w-full cursor-pointer items-center justify-center border border-primary/40 bg-primary/10 text-primary transition-colors duration-200 hover:bg-primary/20 focus-visible:outline-2"
+        className="font-display mb-4 inline-flex h-10 w-full cursor-pointer items-center justify-center border border-stone-200/40 bg-stone-100/10 text-stone-900 transition-colors duration-200 hover:bg-stone-100/20 focus-visible:outline-2"
       >
         <Zap className="mr-2 size-4" aria-hidden="true" />
         <span className="text-xs font-semibold uppercase tracking-[0.18em]">Observation Deck</span>
@@ -37,7 +37,7 @@ export default function LeftNav() {
               aria-current={active ? 'page' : undefined}
               className={cn(
                 "flex cursor-pointer items-center gap-3 border border-transparent px-3 py-2 text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors duration-200 hover:border-border hover:bg-muted/50 hover:text-foreground focus-visible:outline-2",
-                active && "border-primary/50 bg-primary/10 text-primary"
+                active && "border-stone-200/50 bg-stone-100/10 text-stone-900"
               )}
             >
               <item.icon className="size-4" aria-hidden="true" />

@@ -34,7 +34,7 @@ export default function SearchBox() {
           placeholder="Query the network..."
           maxLength={100}
           autoComplete="off"
-          className="h-9 w-full cursor-text border border-border/70 bg-background pl-9 pr-3 text-xs tracking-wider text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-border focus:border-primary"
+          className="h-9 w-full cursor-text border border-border/70 bg-background pl-9 pr-3 text-xs tracking-wider text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-border focus:border-stone-200"
         />
       </div>
     </form>

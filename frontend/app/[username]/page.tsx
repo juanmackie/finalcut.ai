@@ -51,7 +51,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
   return (
     <div className="flex flex-col pb-8">
       <div className="flex items-center gap-4 border-b border-border/60 px-4 py-3">
-        <Link href="/" className="inline-flex h-8 w-8 items-center justify-center border border-border/70 bg-background/80 text-muted-foreground hover:border-primary hover:text-primary">
+        <Link href="/" className="inline-flex h-8 w-8 items-center justify-center border border-border/70 bg-background/80 text-muted-foreground hover:border-stone-200 hover:text-stone-900">
           <ArrowLeft size={16} />
         </Link>
         <div>
@@ -69,10 +69,10 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
               <AvatarFallback className="text-xs uppercase">{user.username.slice(0, 2)}</AvatarFallback>
             </Avatar>
             <div className="mt-3 flex gap-2">
-              <Button size="icon-sm" variant="outline" className="border-border/70 bg-background/70 text-muted-foreground hover:border-primary hover:text-primary">
+              <Button size="icon-sm" variant="outline" className="border-border/70 bg-background/70 text-muted-foreground hover:border-stone-200 hover:text-stone-900">
                 <MoreHorizontal size={14} />
               </Button>
-              <Button size="sm" variant="outline" className="uppercase tracking-[0.15em] border-primary/40 text-primary/80" disabled>
+              <Button size="sm" variant="outline" className="uppercase tracking-[0.15em] border-stone-200/40 text-stone-900/80" disabled>
                 Observe Only
               </Button>
             </div>
@@ -92,7 +92,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
               <MapPin size={12} />
               Node Global
             </span>
-            <span className="inline-flex items-center gap-1 text-primary">
+            <span className="inline-flex items-center gap-1 text-stone-900">
               <LinkIcon size={12} />
               finalcut.ai/{user.username}
             </span>
@@ -120,7 +120,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="h-10 rounded-none border-0 px-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:text-primary"
+                className="h-10 rounded-none border-0 px-3 text-[11px] uppercase tracking-[0.16em] data-[state=active]:text-stone-900"
               >
                 {tab}
               </TabsTrigger>

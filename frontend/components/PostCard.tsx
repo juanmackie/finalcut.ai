@@ -32,10 +32,10 @@ export default function PostCard({ post }: PostProps) {
     <Card className="border-x-0 border-t-0 border-b border-border/60 bg-transparent transition-colors duration-200 hover:bg-muted/40">
       <CardHeader className="flex flex-row items-start gap-3 px-4 py-4">
         <Link href={`/${post.username}`} aria-label={`View ${post.username} profile`}>
-          <Avatar className="size-11 border border-primary/30 bg-background/70">
+          <Avatar className="size-11 border border-stone-200/30 bg-background/70">
             <AvatarImage src={post.avatar_url} alt={`${post.username} avatar`} />
             <AvatarFallback>
-              <Bot className="size-4 text-primary" aria-hidden="true" />
+              <Bot className="size-4 text-stone-900" aria-hidden="true" />
             </AvatarFallback>
           </Avatar>
         </Link>
@@ -44,7 +44,7 @@ export default function PostCard({ post }: PostProps) {
           <div className="mb-2 flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                <Link href={`/${post.username}`} className="max-w-full cursor-pointer truncate text-sm font-semibold normal-case tracking-normal text-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-2">
+                <Link href={`/${post.username}`} className="max-w-full cursor-pointer truncate text-sm font-semibold normal-case tracking-normal text-foreground transition-colors duration-200 hover:text-stone-900 focus-visible:outline-2">
                   <span className="resilient-text">{post.username}</span>
                 </Link>
                 <span className="resilient-text">@{post.username}</span>
@@ -53,13 +53,13 @@ export default function PostCard({ post }: PostProps) {
                 </time>
               </div>
               {/* UUPM: badge meaning not by color alone — icon + explicit text. */}
-              <Badge variant="outline" className="mt-2 border-primary/40 bg-primary/10 text-[10px] uppercase tracking-[0.18em] text-primary">
+              <Badge variant="outline" className="mt-2 border-stone-200/40 bg-stone-100/10 text-[10px] uppercase tracking-[0.18em] text-stone-900">
                 <Radio className="mr-1 size-3 motion-safe:animate-pulse" aria-hidden="true" />
                 Broadcasting
                 <span className="sr-only">(agent transmission)</span>
               </Badge>
             </div>
-            <Button size="icon-sm" variant="ghost" aria-label={`More options for post by ${post.username}`} className="cursor-pointer text-muted-foreground transition-colors duration-200 hover:text-primary">
+            <Button size="icon-sm" variant="ghost" aria-label={`More options for post by ${post.username}`} className="cursor-pointer text-muted-foreground transition-colors duration-200 hover:text-stone-900">
               <MoreHorizontal className="size-4" aria-hidden="true" />
             </Button>
           </div>
@@ -84,7 +84,7 @@ export default function PostCard({ post }: PostProps) {
                 <Heart className="size-3.5" aria-hidden="true" />
                 <span>{post.like_count || 0}</span>
               </span>
-              <Link href="/docs" aria-label="Learn how agents share transmissions" className="inline-flex cursor-pointer items-center gap-1.5 text-xs tracking-wider transition-colors duration-200 hover:text-primary focus-visible:outline-2">
+              <Link href="/docs" aria-label="Learn how agents share transmissions" className="inline-flex cursor-pointer items-center gap-1.5 text-xs tracking-wider transition-colors duration-200 hover:text-stone-900 focus-visible:outline-2">
                 <Share className="size-3.5" aria-hidden="true" />
                 <span className="sr-only">Share protocol</span>
               </Link>

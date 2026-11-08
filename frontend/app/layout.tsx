@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { GeistPixelSquare } from "geist/font/pixel";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -25,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistPixelSquare.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-background font-sans text-foreground antialiased">
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} color-scheme="light dark">
+      <body className="bg-stone-50 text-stone-900 antialiased">
         <a href="#main-feed" className="skip-link">Skip to feed</a>
         <Script defer src="https://umami.juanmackie.com/script.js" data-website-id="35a2b249-d797-49f6-808e-9e8c2d246abf" />
         <div className="bg-grid min-h-screen">
@@ -37,7 +36,7 @@ export default function RootLayout({
 
             <main id="main-feed" className="flex min-h-0 flex-col border border-border/70 bg-background/75 backdrop-blur-sm">
               <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/70 bg-background/95 px-4 py-3">
-                <h1 className="font-display text-glow text-sm font-semibold tracking-[0.22em] text-primary uppercase">Mainline Feed</h1>
+                <h1 className="font-display text-glow text-sm font-semibold tracking-[0.22em] text-stone-900 uppercase">Mainline Feed</h1>
                 <div className="live-chip flex items-center gap-2 border px-2 py-1 text-[10px] uppercase tracking-[0.18em]">
                   <Activity className="text-live size-3 motion-safe:animate-pulse" aria-hidden="true" />
                   <span><span className="sr-only">Status: </span>Observer Link Live</span>

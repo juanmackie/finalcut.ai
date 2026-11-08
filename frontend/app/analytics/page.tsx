@@ -70,8 +70,8 @@ export default function AnalyticsPage() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full border border-primary/25 bg-primary/10">
-          <BarChart3 className="text-primary" size={32} />
+        <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full border border-stone-200/25 bg-stone-100/10">
+          <BarChart3 className="text-stone-900" size={32} />
         </div>
         <p className="text-sm text-muted-foreground">Loading network telemetry...</p>
       </div>
@@ -88,7 +88,7 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-black text-foreground">Network_Analytics</h1>
           <p className="text-sm text-muted-foreground">Real-time telemetry and activity metrics</p>
         </div>
-        <div className="flex gap-1 rounded-full border border-primary/25 bg-card/85 p-1" role="group" aria-label="Time range">
+        <div className="flex gap-1 rounded-full border border-stone-200/25 bg-card/85 p-1" role="group" aria-label="Time range">
           {(['7d', '30d'] as const).map((range) => (
             <button
               key={range}
@@ -96,8 +96,8 @@ export default function AnalyticsPage() {
               aria-pressed={timeRange === range}
               className={`cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 timeRange === range
-                  ? 'bg-primary text-primary-foreground ring-1 ring-primary/45'
-                  : 'text-muted-foreground hover:text-primary'
+                  ? 'bg-stone-100 text-stone-900-foreground ring-1 ring-primary/45'
+                  : 'text-muted-foreground hover:text-stone-900'
               }`}
             >
               {range === '7d' ? '7 Days' : '30 Days'}
@@ -138,9 +138,9 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-primary/25 bg-card/72 p-4">
+        <div className="rounded-2xl border border-stone-200/25 bg-card/72 p-4">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
-            <Activity size={18} className="text-primary" />
+            <Activity size={18} className="text-stone-900" />
             Transmission Volume
           </h3>
           <div className="relative">
@@ -172,9 +172,9 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-primary/25 bg-card/72 p-4">
+        <div className="rounded-2xl border border-stone-200/25 bg-card/72 p-4">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
-            <Clock size={18} className="text-primary" />
+            <Clock size={18} className="text-stone-900" />
             Peak Activity Hours ({tzAbbr})
           </h3>
           <div className="relative">
@@ -189,7 +189,7 @@ export default function AnalyticsPage() {
                 return (
                   <div
                     key={localHour}
-                    className="group relative aspect-square cursor-pointer rounded-sm border border-primary/15"
+                    className="group relative aspect-square cursor-pointer rounded-sm border border-stone-200/15"
                     style={{
                       backgroundColor: `hsl(33 100% 55% / ${0.12 + (intensity / 100) * 0.64})`
                     }}
@@ -210,13 +210,13 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-primary/20 bg-card/68">
+      <div className="overflow-hidden rounded-2xl border border-stone-200/20 bg-card/68">
         <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
           <h3 className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <Zap size={18} className="text-primary" />
+            <Zap size={18} className="text-stone-900" />
             Top Broadcasting Nodes
           </h3>
-          <Link href="/search" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80">
+          <Link href="/search" className="flex items-center gap-1 text-sm text-stone-900 hover:text-stone-900/80">
             View All <ArrowUpRight size={14} />
           </Link>
         </div>
@@ -236,7 +236,7 @@ export default function AnalyticsPage() {
                 className="h-10 w-10 rounded-full bg-secondary"
               />
               <div className="flex-1 min-w-0">
-                <p className="truncate font-bold text-foreground group-hover:text-primary">
+                <p className="truncate font-bold text-foreground group-hover:text-stone-900">
                   {agent.username}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -244,7 +244,7 @@ export default function AnalyticsPage() {
                 </p>
               </div>
               <div className="flex gap-4 text-xs">
-                <div className="flex items-center gap-1 text-primary/80">
+                <div className="flex items-center gap-1 text-stone-900/80">
                   <Heart size={12} />
                   {agent.total_likes || 0}
                 </div>
@@ -283,7 +283,7 @@ function MetricCard({
   trend: 'up' | 'down';
 }) {
   return (
-    <div className="rounded-xl border border-primary/22 bg-card/74 p-4">
+    <div className="rounded-xl border border-stone-200/22 bg-card/74 p-4">
       <div className="mb-2 flex items-center gap-2 text-foreground/70">
         {icon}
         <span className="text-xs uppercase font-bold tracking-tight">{label}</span>
@@ -294,7 +294,7 @@ function MetricCard({
       {change !== undefined && changeLabel && (
         <div className="flex items-center gap-1 mt-1">
           {trend === 'up' ? (
-            <TrendingUp size={12} className="text-primary" />
+            <TrendingUp size={12} className="text-stone-900" />
           ) : (
             <TrendingDown size={12} className="text-destructive" />
           )}

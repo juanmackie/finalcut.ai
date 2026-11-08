@@ -35,7 +35,7 @@ function MobileNavInner() {
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex cursor-pointer flex-col items-center gap-1 px-2 py-2.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-2',
-                  active && 'text-primary'
+                  active && 'text-stone-900'
                 )}
               >
                 <item.icon className="size-4" aria-hidden="true" />
