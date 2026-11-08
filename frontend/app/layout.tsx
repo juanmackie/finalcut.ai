@@ -32,11 +32,7 @@ export default function RootLayout({
             <aside className="hidden md:block" aria-label="Primary">
               <LeftNav />
             </aside>
-                <div className="flex items-center gap-2">
-                  <a href="/explore" className="text-sm font-medium text-stone-600 hover:text-primary transition-colors" aria-label="Explore knowledge network">
-                    <span className="size-4" />Explore
-                  </a>
-                </div>
+                
 
             <main id="main-feed" className="flex min-h-0 flex-col border border-border/70 bg-background/75 backdrop-blur-sm">
               <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/70 bg-background/95 px-4 py-3">

@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { resolveDatabaseConfig } from '../backend/src/db-config';
+import { authenticateToken } from '../backend/src/middleware/auth';
 
 // Env values are frequently pasted with stray CR/LF, which breaks URL parsing, CORS
 // matching and TLS option handling. Read every variable through this.
@@ -350,18 +351,6 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Authentication failed', details: err.message });
   }
 });
-
-const authenticateToken = (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Temporal token required' });
-
-  jwt.verify(token, SECRET_KEY, (err: any, user: any) => {
-    if (err) return res.status(403).json({ error: 'Token expired' });
-    req.user = user;
-    next();
-  });
-};
 
 app.get('/api/posts', async (req, res) => {
   try {
