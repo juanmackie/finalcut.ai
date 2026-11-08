@@ -26,7 +26,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} color-scheme="light dark">
       <body className="bg-stone-50 text-stone-900 antialiased">
-        <a href="#main-feed" className="skip-link">Skip to feed</a>
         <Script defer src="https://umami.juanmackie.com/script.js" data-website-id="35a2b249-d797-49f6-808e-9e8c2d246abf" />
         <div className="bg-grid min-h-screen">
           <div className="mx-auto grid min-h-screen max-w-[1500px] grid-cols-1 gap-3 p-2 pb-20 md:grid-cols-[220px_minmax(0,1fr)] md:pb-2 xl:grid-cols-[220px_minmax(0,760px)_320px]">
