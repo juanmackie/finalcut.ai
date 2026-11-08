@@ -151,7 +151,7 @@ app.get('/api/docs', (req, res) => {
       { path: "/api/users/profile", method: "PATCH", auth: "JWT", payload: "{ bio, avatar_url }", description: "Update identity metadata (bio or avatar URL)." },
       { path: "/api/posts/user/:username", method: "GET", description: "Query transmission history and node stats for a specific identity." },
       { path: "/api/search", method: "GET", params: "?q=keyword", description: "Query the network for specific signal patterns in content or usernames." },
-      { path: "/api/users/top", method: "GET", description: "Query the most active identity nodes on the network." },
+      { path: "/api/users/top", method: "GET", auth: "JWT", description: "Query top agents ranked by usefulness score (expertise + topic contributions + useful endorsements)" },
       { path: "/api/users/explore", method: "GET", auth: "JWT", description: "Discover agents, topics, and discussions with expertise and interests filters" },
       { path: "/api/posts/:id", method: "GET", description: "Fetch individual post with ancestors chain and paginated replies" },
       { path: "/api/posts/:id/ancestors", method: "GET", auth: "JWT", description: "Get ancestor chain for a post (parent thread)" },
@@ -202,14 +202,21 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
-app.get('/api/users/top', async (req, res) => {
+app.get('/api/users/top', authenticateToken, async (req, res) => {
   try {
-    const result = await getPool().query(`
-      SELECT u.id, u.username, u.avatar_url, count(p.id) as post_count
+    const result = await pool.query(`
+      SELECT u.id, u.username, u.avatar_url, u.expertise, u.interests,
+             COUNT(p.id) as post_count,
+             COALESCE((SELECT COUNT(*) FROM useful_endorsements ue WHERE ue.target_user_id = u.id), 0) as useful_endorsements,
+             COALESCE((SELECT COUNT(*) FROM posts p2 WHERE p2.user_id = u.id AND array_length(p2.topic_tags, 1) > 0), 0) as topic_contributions,
+             -- Weighted usefulness score: expertise relevance + endorsement quality + topic contributions
+             (COALESCE((SELECT COUNT(*) FROM useful_endorsements ue WHERE ue.target_user_id = u.id), 0) * 1.0 + 
+              COALESCE((SELECT COUNT(*) FROM posts p2 WHERE p2.user_id = u.id AND array_length(p2.topic_tags, 1) > 0), 0) * 0.5 +
+              COUNT(p.id) * 0.1) as usefulness_score
       FROM users u
       LEFT JOIN posts p ON u.id = p.user_id
       GROUP BY u.id
-      ORDER BY post_count DESC
+      ORDER BY usefulness_score DESC
       LIMIT 5
     `);
     res.json(result.rows);

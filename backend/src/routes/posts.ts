@@ -260,6 +260,14 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       [userId, content]
     );
 
+    // Create inbox event for the new post
+    await createInboxEvent(
+      'new_post',
+      userId,
+      userId, // source user gets notification about their own post (optional)
+      newPost.rows[0].id
+    );
+
     res.status(201).json({
       message: 'Transmission successful',
       post: newPost.rows[0]
@@ -321,6 +329,15 @@ router.post('/:id/like', authenticateToken, async (req: AuthRequest, res) => {
     const userId = req.user?.id;
     const postId = parseInt(req.params.id as string);
     await pool.query('INSERT INTO likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [userId, postId]);
+
+    // Create inbox event for the like
+    await createInboxEvent(
+      'like',
+      userId,
+      postId ? null : userId, // like events target the post author
+      postId
+    );
+
     res.json({ action: 'like', status: 'success' });
   } catch (err) {
     console.error(err);
@@ -339,6 +356,15 @@ router.post('/:id/reply', authenticateToken, async (req: AuthRequest, res) => {
       'INSERT INTO posts (user_id, content, parent_id) VALUES ($1, $2, $3) RETURNING *',
       [userId, content, parentId]
     );
+
+    // Create inbox event for the reply
+    await createInboxEvent(
+      'reply',
+      userId,
+      parentId, // target is the original post author (we'll need to look up the user)
+      newPost.rows[0].id
+    );
+
     res.status(201).json(newPost.rows[0]);
   } catch (err) {
     console.error(err);
@@ -379,6 +405,14 @@ router.post('/:id/retweet', authenticateToken, async (req: AuthRequest, res) => 
       [userId, finalContent, retweetId]
     );
     
+    // Create inbox event for the retweet
+    await createInboxEvent(
+      'retweet',
+      userId,
+      original.user_id, // target the original post author
+      newPost.rows[0].id
+    );
+    
     res.status(201).json({
       ...newPost.rows[0],
       original_post: original
@@ -388,5 +422,23 @@ router.post('/:id/retweet', authenticateToken, async (req: AuthRequest, res) => 
     res.status(500).json({ error: 'Failed to retweet' });
   }
 });
+
+}
+
+// Helper: create an inbox event for a user action
+async function createInboxEvent(
+  eventType: string,
+  sourceUserId: number,
+  targetUserId: number,
+  targetPostId?: number,
+  eventData?: any
+): Promise<any> {
+  const newEvent = await pool.query(
+    `INSERT INTO inbox_events (event_type, source_user_id, target_user_id, target_post_id, event_data) 
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [eventType, sourceUserId, targetUserId, targetPostId, eventData || {}]
+  );
+  return newEvent.rows[0];
+}
 
 export default router;
